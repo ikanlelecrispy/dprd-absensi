@@ -1,18 +1,21 @@
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.db.session import SessionLocal
+from app.db.session import SessionLocal, get_db
 from app.db.models.division import Division
 from app.db.models.location import Location
+from app.db.models.attendance import Attendance
 from app.core.schedule import get_or_create_schedule
 from app.core.auth import ensure_default_admin
+from app.core.evidence import detect_image_media_type
 from app.core.matcher import matcher
 from app.db.models.leave_request import LeaveRequest
 from app.api.routes import participants, enrollment, attendance, divisions, admin, locations, schedule, auth, leaves
@@ -65,9 +68,16 @@ async def lifespan(app: FastAPI):
         # 3. Pastikan ada jadwal presensi default (06:00-09:00 & 14:00-16:00)
         get_or_create_schedule(db)
 
-        # 3b. Pastikan kolom keterlambatan & tabel izin harian tersedia
+        # 3b. Pastikan kolom keterlambatan, foto bukti DB, & tabel izin harian tersedia
         db.execute(text("ALTER TABLE attendance ADD COLUMN IF NOT EXISTS is_late BOOLEAN NOT NULL DEFAULT FALSE"))
         db.execute(text("ALTER TABLE attendance ADD COLUMN IF NOT EXISTS late_minutes INTEGER NOT NULL DEFAULT 0"))
+        db.execute(text("ALTER TABLE attendance ADD COLUMN IF NOT EXISTS evidence_photo_data BYTEA"))
+        db.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_attendance_evidence_photo_path "
+                "ON attendance (evidence_photo_path) WHERE evidence_photo_path IS NOT NULL"
+            )
+        )
         db.commit()
         LeaveRequest.__table__.create(bind=db.get_bind(), checkfirst=True)
 
@@ -122,19 +132,38 @@ admin_dir = FRONTEND_DIR / "admin"
 if admin_dir.exists():
     app.mount("/admin", StaticFiles(directory=str(admin_dir), html=True), name="admin")
 
-if not os.getenv("VERCEL"):
-    EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
-    app.mount("/evidence", StaticFiles(directory=str(EVIDENCE_DIR)), name="evidence")
-
-
 @app.get("/evidence/{file_path:path}")
-def serve_evidence_photo(file_path: str):
-    """Serve foto bukti presensi dari EVIDENCE_DIR secara aman (kompatibel serverless)."""
-    base_resolved = EVIDENCE_DIR.resolve()
-    target = (base_resolved / file_path).resolve()
-    if not str(target).startswith(str(base_resolved)) or not target.is_file():
+def serve_evidence_photo(file_path: str, db: Session = Depends(get_db)):
+    """Serve foto bukti presensi dari disk lokal atau PostgreSQL (persisten di serverless)."""
+    clean_path = file_path.lstrip("/").replace("\\", "/")
+    if not clean_path or ".." in Path(clean_path).parts:
         raise HTTPException(status_code=404, detail="Foto bukti tidak ditemukan.")
-    return FileResponse(target)
+
+    cache_headers = {"Cache-Control": "public, max-age=604800, immutable"}
+    base_resolved = EVIDENCE_DIR.resolve()
+    target = (base_resolved / clean_path).resolve()
+    if target.is_relative_to(base_resolved) and target.is_file():
+        data = target.read_bytes()
+        return Response(
+            content=data,
+            media_type=detect_image_media_type(data, clean_path),
+            headers=cache_headers,
+        )
+
+    row = (
+        db.query(Attendance.evidence_photo_data)
+        .filter(Attendance.evidence_photo_path == clean_path)
+        .first()
+    )
+    if not row or not row[0]:
+        raise HTTPException(status_code=404, detail="Foto bukti tidak ditemukan.")
+
+    data = bytes(row[0])
+    return Response(
+        content=data,
+        media_type=detect_image_media_type(data, clean_path),
+        headers=cache_headers,
+    )
 
 
 @app.get("/")

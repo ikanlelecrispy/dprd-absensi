@@ -14,6 +14,7 @@ from app.core.matcher import matcher
 from app.core.face_processor import face_processor
 from app.core.geofence import validate_geofence
 from app.core.schedule import resolve_current_session, find_duplicate_attendance_today
+from app.core.evidence import save_attendance_evidence
 
 router = APIRouter()
 settings = get_settings()
@@ -168,13 +169,13 @@ async def websocket_kiosk_recognition(websocket: WebSocket):
                     # 2. Catat Presensi Baru (Belum pernah presensi jenis ini hari ini)
                     cooldown_cache[pid] = now
 
-                    # Simpan foto bukti
-                    today_str = now.strftime("%Y/%m/%d")
-                    ev_dir = evidence_base / today_str
-                    ev_dir.mkdir(parents=True, exist_ok=True)
-                    ev_filename = f"{uuid.uuid4()}.jpg"
-                    ev_file_path = ev_dir / ev_filename
-                    cv2.imwrite(str(ev_file_path), frame_bgr, [cv2.IMWRITE_JPEG_QUALITY, 80])
+                    # Simpan foto bukti terkompresi (crop wajah + WebP ringkas)
+                    evidence = save_attendance_evidence(
+                        frame_bgr,
+                        checked_at=now,
+                        bbox=res.bbox,
+                        base_dir=evidence_base,
+                    )
 
                     # Simpan record ke database
                     att_record = Attendance(
@@ -187,7 +188,8 @@ async def websocket_kiosk_recognition(websocket: WebSocket):
                         latitude=lat_val,
                         longitude=lng_val,
                         distance_meters=geo.distance_meters,
-                        evidence_photo_path=f"{today_str}/{ev_filename}",
+                        evidence_photo_path=evidence.relative_path if evidence else None,
+                        evidence_photo_data=evidence.data if evidence else None,
                         is_suspicious=match_res.is_suspicious,
                         suspicious_reason=match_res.suspicious_reason,
                     )

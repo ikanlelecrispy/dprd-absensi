@@ -259,7 +259,7 @@ async function loadAttendanceLogs() {
 
       const photoCell = r.evidence_photo_url
         ? `<button type="button" class="thumb-btn" onclick="zoomPhoto('${escapeHtml(r.evidence_photo_url)}')" aria-label="Perbesar bukti foto ${escapeHtml(r.full_name)}">
-             <img src="${escapeHtml(r.evidence_photo_url)}" alt="Foto ${escapeHtml(r.full_name)}" class="log-thumb" />
+             <img src="${escapeHtml(r.evidence_photo_url)}" alt="Foto ${escapeHtml(r.full_name)}" class="log-thumb" loading="lazy" onerror="handleLogThumbError(this)" />
            </button>`
         : '<span class="cell-sub">-</span>';
 
@@ -670,6 +670,16 @@ async function downloadParticipantReport(format) {
   }
 }
 
+function handleLogThumbError(imgEl) {
+  const btn = imgEl?.closest(".thumb-btn");
+  if (!btn) return;
+  const fallback = document.createElement("span");
+  fallback.className = "cell-sub";
+  fallback.title = "Foto bukti kedaluwarsa atau tidak tersedia";
+  fallback.textContent = "-";
+  btn.replaceWith(fallback);
+}
+
 function zoomPhoto(photoUrl) {
   const modal = document.getElementById("photoModal");
   const img = document.getElementById("zoomedImg");
@@ -677,6 +687,11 @@ function zoomPhoto(photoUrl) {
   if (!modal || !img) return;
 
   lastModalTrigger = document.activeElement;
+  img.onerror = () => {
+    modal.hidden = true;
+    img.src = "";
+    showAdminToast("Foto bukti tidak tersedia di server.", "error");
+  };
   img.src = photoUrl;
   modal.hidden = false;
   if (closeBtn) closeBtn.focus();

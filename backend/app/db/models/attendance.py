@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from sqlalchemy import (
     String, DateTime, ForeignKey, Float, Boolean,
-    Text, Integer, func, Enum as PgEnum
+    Text, Integer, LargeBinary, func, Enum as PgEnum
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
@@ -69,8 +69,12 @@ class Attendance(Base):
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     distance_meters: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    # Path relatif ke foto bukti (mis: "2024/01/15/uuid.jpg")
+    # Path relatif ke foto bukti (mis: "2024/01/15/uuid.webp")
     evidence_photo_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    # Konten byte terkompresi foto bukti agar persisten di serverless/PostgreSQL
+    evidence_photo_data: Mapped[bytes | None] = mapped_column(
+        LargeBinary, nullable=True, deferred=True
+    )
 
     # Flag untuk review admin
     is_suspicious: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

@@ -22,6 +22,7 @@ from app.core.schedule import (
 )
 from app.core.matcher import matcher
 from app.core.face_processor import face_processor
+from app.core.evidence import save_attendance_evidence
 
 router = APIRouter(prefix="/attendance", tags=["Attendance"])
 settings = get_settings()
@@ -155,13 +156,13 @@ def verify_face_attendance(data: FaceVerifyRequest, db: Session = Depends(get_db
             "message": geo.reason or "Lokasi berada di luar jangkauan area presensi.",
         }
 
-    # Simpan foto bukti
-    evidence_base = Path(settings.resolved_evidence_photo_path)
-    today_str = now.strftime("%Y/%m/%d")
-    ev_dir = evidence_base / today_str
-    ev_dir.mkdir(parents=True, exist_ok=True)
-    ev_filename = f"{uuid.uuid4()}.jpg"
-    cv2.imwrite(str(ev_dir / ev_filename), frame_bgr, [cv2.IMWRITE_JPEG_QUALITY, 80])
+    # Simpan foto bukti terkompresi (crop area wajah + WebP ringkas)
+    evidence = save_attendance_evidence(
+        frame_bgr,
+        checked_at=now,
+        bbox=res.bbox,
+        base_dir=Path(settings.resolved_evidence_photo_path),
+    )
 
     # Simpan log presensi ke DB
     att_record = Attendance(
@@ -174,7 +175,8 @@ def verify_face_attendance(data: FaceVerifyRequest, db: Session = Depends(get_db
         latitude=data.latitude,
         longitude=data.longitude,
         distance_meters=geo.distance_meters,
-        evidence_photo_path=f"{today_str}/{ev_filename}",
+        evidence_photo_path=evidence.relative_path if evidence else None,
+        evidence_photo_data=evidence.data if evidence else None,
         is_suspicious=match_res.is_suspicious,
         suspicious_reason=match_res.suspicious_reason,
         is_late=session.is_late,
@@ -300,8 +302,9 @@ def submit_fallback_pin_attendance(data: FallbackPinRequest, db: Session = Depen
             detail=f"Peserta '{participant.full_name}' SUDAH melakukan presensi {dup_label} hari ini pukul {waktu_str}.",
         )
 
-    # 3. Simpan foto bukti snapshot kamera jika ada
-    ev_rel_path = None
+    # 3. Simpan foto bukti snapshot kamera secara ringkas & persisten
+    ev_rel_path: str | None = None
+    ev_photo_data: bytes | None = None
     if data.photo_b64:
         try:
             raw_b64 = data.photo_b64
@@ -312,13 +315,15 @@ def submit_fallback_pin_attendance(data: FallbackPinRequest, db: Session = Depen
             frame_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
             if frame_bgr is not None:
-                evidence_base = Path(settings.resolved_evidence_photo_path)
-                today_str = now.strftime("%Y/%m/%d")
-                ev_dir = evidence_base / today_str
-                ev_dir.mkdir(parents=True, exist_ok=True)
-                ev_filename = f"{uuid.uuid4()}.jpg"
-                cv2.imwrite(str(ev_dir / ev_filename), frame_bgr, [cv2.IMWRITE_JPEG_QUALITY, 80])
-                ev_rel_path = f"{today_str}/{ev_filename}"
+                evidence = save_attendance_evidence(
+                    frame_bgr,
+                    checked_at=now,
+                    bbox=None,
+                    base_dir=Path(settings.resolved_evidence_photo_path),
+                )
+                if evidence is not None:
+                    ev_rel_path = evidence.relative_path
+                    ev_photo_data = evidence.data
         except Exception:
             pass
 
@@ -334,6 +339,7 @@ def submit_fallback_pin_attendance(data: FallbackPinRequest, db: Session = Depen
         longitude=data.longitude,
         distance_meters=geo.distance_meters,
         evidence_photo_path=ev_rel_path,
+        evidence_photo_data=ev_photo_data,
         is_suspicious=False,
         is_late=session.is_late,
         late_minutes=session.late_minutes,
