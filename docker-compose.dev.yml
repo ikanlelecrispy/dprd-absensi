@@ -1,0 +1,11 @@
+# Override untuk development
+# Jalankan dengan:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up -d
+
+services:
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      # Di dev, expose ke semua interface agar bisa diakses dari host
+      - "5432:5432"

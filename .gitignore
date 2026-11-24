@@ -1,0 +1,67 @@
+# ============================================================
+# .gitignore — Sistem Presensi Wajah DPRD Surakarta
+# ============================================================
+
+# 1. Environment & Secrets (SANGAT KRUSIAL)
+.env
+*.env
+backend/.env
+!.env.example
+!backend/.env.example
+
+# 2. Virtual Environments
+venv/
+backend/venv/
+env/
+.venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# 3. Python Cache & Bytecode
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+*/*/*/__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# 4. Data Biometrik & Foto Bukti (Kepatuhan UU PDP)
+backend/data/evidence_photos/*
+!backend/data/evidence_photos/.gitkeep
+backend/data/enrollment_temp/*
+!backend/data/enrollment_temp/.gitkeep
+
+# 5. Local Databases
+*.db
+*.sqlite
+*.sqlite3
+backend/data/*.db
+backend/data/*.sqlite
+
+# 6. Pretrained AI Models (File ONNX & ZIP Ukuran Besar)
+backend/models/models/
+backend/models/*.zip
+backend/models/*
+!backend/models/.gitkeep
+
+# 7. IDE & Sistem Operasi
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 8. Log & File Sementara
+*.log
+*.tmp
+logs/
+backend/logs/

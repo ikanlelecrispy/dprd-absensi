@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Presensi | Magang Setwan DPRD Surakarta</title>
+  <link rel="icon" type="image/png" href="assets/logo-emblem.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/kiosk.css?v=20261122_1" />
+</head>
+<body id="top">
+
+  <!-- =========================================================================
+       FLOATING PILL NAVBAR (Mengikuti desain navbar referensi)
+       ========================================================================= -->
+  <header class="floating-header-wrap">
+    <div class="floating-nav">
+      <div class="nav-left">
+        <a href="#top" class="brand-link" title="Kembali ke atas halaman">
+          <img
+            src="assets/logo-emblem.png"
+            alt="Logo Magang Setwan DPRD Surakarta"
+            width="38"
+            height="38"
+            fetchpriority="high"
+            class="brand-logo"
+          />
+          <span class="brand-text-stack">
+            <span class="brand-name-short">Magang Setwan</span>
+            <span class="brand-sub-short">DPRD Surakarta</span>
+          </span>
+        </a>
+
+        <nav class="desktop-nav" aria-label="Navigasi utama">
+          <button
+            id="btnNavFitur"
+            type="button"
+            class="nav-text-btn"
+            aria-expanded="false"
+            aria-controls="navMegaMenu"
+            onclick="toggleNavMenu(event, this)"
+          >
+            <span>Fitur</span>
+            <svg class="nav-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <button
+            id="btnNavPanduan"
+            type="button"
+            class="nav-text-btn"
+            aria-expanded="false"
+            aria-controls="navPanduanMenu"
+            onclick="togglePanduanMenu(event, this)"
+          >
+            <span>Panduan</span>
+            <svg class="nav-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <a href="#panelJadwal" class="nav-text-link">Jadwal</a>
+          <a href="/kiosk/izin.html" class="nav-text-link">Izin Harian</a>
+        </nav>
+      </div>
+
+      <div class="nav-right-desktop">
+        <button
+          id="btnGpsPopover"
+          type="button"
+          class="status-pill status-pill-gps"
+          aria-expanded="false"
+          aria-controls="gpsPopover"
+          onclick="toggleGpsPopover(event, this)"
+        >
+          <svg class="ui-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <span id="locationBadgeText">Cek Lokasi</span>
+        </button>
+
+        <div id="kioskBadgePill" class="status-pill status-pill-online" role="status" aria-live="polite">
+          <span id="kioskSolidDot" class="status-dot" aria-hidden="true"></span>
+          <span id="kioskBadge">ONLINE</span>
+        </div>
+
+        <a href="/admin/index.html" target="_blank" rel="noopener" class="nav-signin-link">
+          Dashboard Admin
+        </a>
+
+        <button id="btnOpenEnroll" type="button" class="nav-cta-btn" onclick="openEnrollmentModal(this)">
+          Daftar Peserta
+        </button>
+      </div>
+
+      <!-- Kontrol Mobile & Tablet (< 1024px) -->
+      <div class="mobile-controls">
+        <button
+          id="btnGpsPopoverMobile"
+          type="button"
+          class="status-pill status-pill-gps status-pill-compact"
+          aria-expanded="false"
+          aria-controls="gpsPopover"
+          aria-label="Status lokasi GPS"
+          onclick="toggleGpsPopover(event, this)"
+        >
+          <svg class="ui-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <span id="locationBadgeTextMobile">Lokasi</span>
+        </button>
+
+        <div id="kioskBadgePillMobile" class="status-pill status-pill-online status-pill-compact" role="status" aria-live="polite">
+          <span id="kioskSolidDotMobile" class="status-dot" aria-hidden="true"></span>
+          <span id="kioskBadgeMobile">ONLINE</span>
+        </div>
+
+        <button
+          id="btnMobileMenu"
+          type="button"
+          class="mobile-menu-trigger"
+          aria-expanded="false"
+          aria-controls="mobileNavDrawer"
+          aria-label="Buka menu navigasi"
+          onclick="toggleMobileNav()"
+        >
+          <svg id="mobileMenuSvg" class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+          <span>Menu</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Dropdown 2 Kolom ("Panduan | Perangkat") persis seperti card dropdown pada referensi -->
+    <div id="navMegaMenu" class="nav-mega-popover is-hidden" role="region" aria-label="Menu fitur presensi">
+      <div class="mega-col">
+        <p class="mega-col-title">Panduan</p>
+        <p class="mega-col-desc">Akses langsung fitur presensi harian, pendaftaran wajah baru, dan jalur PIN cadangan.</p>
+        <div class="mega-actions">
+          <a href="#workspacePresensi" class="mega-link-item" onclick="closeNavMenu(false)">
+            <span class="mega-item-title">Kamera Presensi Wajah</span>
+            <span class="mega-item-meta">Masuk &amp; pulang otomatis</span>
+          </a>
+          <button type="button" class="mega-link-item" onclick="closeNavMenu(false); openEnrollmentModal(this);">
+            <span class="mega-item-title">Daftar Peserta Baru</span>
+            <span class="mega-item-meta">Ambil 3 sudut wajah peserta</span>
+          </button>
+          <a href="#todayLogsSection" class="mega-link-item" onclick="closeNavMenu(false)">
+            <span class="mega-item-title">Log Presensi Hari Ini</span>
+            <span class="mega-item-meta">Lihat daftar masuk dan pulang</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="mega-col mega-col-right">
+        <p class="mega-col-title">Perangkat</p>
+        <p class="mega-col-desc">Periksa akurasi GPS terhadap gedung kantor atau ubah mode layar terminal.</p>
+        <div class="mega-actions">
+          <button type="button" class="mega-link-item" onclick="closeNavMenu(false); toggleGpsPopover(event, document.getElementById('btnGpsPopover'));">
+            <span class="mega-item-title">Status Radius Lokasi</span>
+            <span class="mega-item-meta">Koordinat dan jarak ke kantor</span>
+          </button>
+          <button id="btnFullscreen" type="button" class="mega-link-item" onclick="closeNavMenu(false); toggleFullScreen();">
+            <span class="mega-item-title-row">
+              <svg id="iconFullscreenSvg" class="ui-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+              </svg>
+              <span id="labelFullscreen">Layar Penuh</span>
+            </span>
+            <span class="mega-item-meta">Tampilan penuh untuk tablet kiosk</span>
+          </button>
+          <a href="/admin/index.html" target="_blank" rel="noopener" class="mega-link-item" onclick="closeNavMenu(false)">
+            <span class="mega-item-title">Panel Admin</span>
+            <span class="mega-item-meta">Rekap harian, lokasi, dan jadwal</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dropdown 2 Kolom Panduan Presensi & Privasi Data -->
+    <div id="navPanduanMenu" class="nav-panduan-popover is-hidden" role="region" aria-label="Panduan Presensi dan Privasi Data">
+      <div class="split-pane">
+        <p class="split-title">Panduan Presensi</p>
+        <p class="split-desc">
+          Ikuti alur singkat di bawah ini setiap kali mencatat kehadiran di lingkungan DPRD Kota Surakarta.
+        </p>
+        <ul class="split-list">
+          <li>
+            <strong>1. Buka pratinjau kamera</strong>
+            <span>Tekan tombol Aktifkan Kamera dan izinkan akses kamera serta GPS browser bila diminta.</span>
+          </li>
+          <li>
+            <strong>2. Ambil bingkai wajah pada jam sesi</strong>
+            <span>Posisikan wajah di area panduan saat status jadwal menunjukkan Masuk atau Pulang terbuka, lalu tekan Mulai Presensi.</span>
+          </li>
+          <li>
+            <strong>3. Gunakan PIN cadangan bila perlu</strong>
+            <span>Jika wajah gagal dikenali dua kali berturut-turut, pop-up presensi PIN pribadi akan muncul otomatis.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="split-pane split-pane-right">
+        <p class="split-title">Perangkat &amp; Privasi Data</p>
+        <p class="split-desc">
+          Peserta baru cukup mendaftar satu kali melalui pengambilan tiga sudut wajah. Data diubah menjadi vektor terenkripsi sesuai ketentuan UU PDP Indonesia dan dapat dinonaktifkan admin saat masa magang selesai.
+        </p>
+        <div class="split-links">
+          <button type="button" class="btn-outline-soft" onclick="closePanduanMenu(false); openEnrollmentModal(this);">Daftarkan Wajah Peserta</button>
+          <button type="button" class="btn-outline-soft" onclick="closePanduanMenu(false); toggleGpsPopover(event, document.getElementById('btnGpsPopover'));">Cek Lokasi GPS</button>
+          <a href="/admin/index.html" target="_blank" rel="noopener" class="btn-outline-soft" onclick="closePanduanMenu(false);">Buka Dashboard Admin</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popover Geofence -->
+    <div id="gpsPopover" class="gps-popover is-hidden" role="dialog" aria-label="Detail Verifikasi Lokasi">
+      <div class="popover-head">
+        <span class="popover-title">Verifikasi Lokasi Geofence</span>
+        <button type="button" class="icon-close-btn" aria-label="Tutup detail lokasi" onclick="closeGpsPopover()">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <dl class="popover-list">
+        <div class="popover-row">
+          <dt>Status Geofence</dt>
+          <dd id="popGeoStatus">Memuat...</dd>
+        </div>
+        <div class="popover-row">
+          <dt>Titik Lokasi</dt>
+          <dd id="popGeoName">-</dd>
+        </div>
+        <div class="popover-row">
+          <dt>Koordinat GPS Anda</dt>
+          <dd id="popGeoCoords" class="mono-chip">-</dd>
+        </div>
+        <div class="popover-row">
+          <dt>Jarak / Batas Radius</dt>
+          <dd id="popGeoRadius" class="mono-text">-</dd>
+        </div>
+        <div class="popover-row">
+          <dt>Akurasi Sinyal</dt>
+          <dd id="popGeoAccuracy" class="mono-text">-</dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Menu Drawer Mobile (< 1024px) -->
+    <nav id="mobileNavDrawer" class="mobile-drawer is-hidden" aria-label="Navigasi Mobile">
+      <a href="#workspacePresensi" class="drawer-item" onclick="toggleMobileNav(false);">
+        <span>Kamera Presensi Wajah</span>
+        <span class="drawer-meta">Ke kamera</span>
+      </a>
+
+      <a href="#panelJadwal" class="drawer-item" onclick="toggleMobileNav(false);">
+        <span>Jadwal &amp; Status</span>
+        <span class="drawer-meta">Jam sesi server</span>
+      </a>
+
+      <a href="/kiosk/izin.html" class="drawer-item" onclick="toggleMobileNav(false);">
+        <span>Izin Harian (Mobile)</span>
+        <span class="drawer-meta">Form pengajuan izin</span>
+      </a>
+
+      <details class="drawer-accordion">
+        <summary class="drawer-item drawer-summary">
+          <span>Panduan Presensi</span>
+          <span class="drawer-meta">Alur &amp; privasi</span>
+        </summary>
+        <div class="drawer-guide-body">
+          <ol class="drawer-guide-steps">
+            <li>Tekan Aktifkan Kamera dan izinkan akses kamera serta GPS browser bila diminta.</li>
+            <li>Posisikan wajah di dalam bingkai saat jam Masuk atau Pulang terbuka, lalu tekan Mulai Presensi.</li>
+            <li>Jika wajah gagal dikenali dua kali, pop-up presensi PIN pribadi muncul otomatis.</li>
+          </ol>
+          <p class="drawer-guide-privasi">
+            Foto pendaftaran diubah menjadi vektor terenkripsi sesuai UU PDP Indonesia dan dapat dinonaktifkan admin.
+          </p>
+        </div>
+      </details>
+
+      <a href="/admin/index.html" target="_blank" rel="noopener" class="drawer-item" onclick="toggleMobileNav(false);">
+        <span>Dashboard Admin</span>
+        <span class="drawer-meta">Tab baru</span>
+      </a>
+
+      <button type="button" class="drawer-item" onclick="toggleMobileNav(false); toggleFullScreen();">
+        <span id="labelFullscreenMobile">Mode Layar Penuh</span>
+        <span class="drawer-meta">Tampilan penuh</span>
+      </button>
+
+      <button type="button" class="drawer-item drawer-item-primary" onclick="toggleMobileNav(false); openEnrollmentModal(this);">
+        <span>Daftar Peserta Baru</span>
+        <span class="drawer-meta">Ambil 3 sudut wajah</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- =========================================================================
+       KONTEN UTAMA: HERO RINGKAS + WORKSPACE PRESENSI + KARTU PANDUAN 2 KOLOM
+       ========================================================================= -->
+  <main class="page-main">
+    <section class="hero-strip" aria-labelledby="heroHeading">
+      <div class="hero-copy">
+        <h1 id="heroHeading" class="hero-title">Presensi Magang DPRD Kota Surakarta</h1>
+        <p class="hero-desc">
+          Catat kehadiran masuk dan pulang peserta magang Gedung Baru menggunakan kamera perangkat dan verifikasi lokasi.
+        </p>
+      </div>
+    </section>
+
+    <section id="workspacePresensi" class="workspace-grid" aria-label="Area Presensi Wajah">
+      <!-- KOLOM KIRI (PATEN DI DESKTOP): LOG PRESENSI MASUK & PULANG HARI INI -->
+      <aside id="todayLogsSection" class="today-logs-section" aria-label="Log Presensi Hari Ini">
+        <div class="surface-card today-log-card">
+          <div class="today-log-head">
+            <div>
+              <h2 class="today-log-title">Berhasil Presensi Masuk</h2>
+              <p class="today-log-sub">Kehadiran tepat waktu maupun terlambat hari ini.</p>
+            </div>
+            <div class="today-log-head-meta">
+              <span id="logDateCheckIn" class="log-date-tag">Hari ini</span>
+              <span id="countTodayCheckIn" class="log-count-pill log-count-in">0</span>
+            </div>
+          </div>
+          <ul id="todayCheckInList" class="today-log-list">
+            <li class="log-empty-row">Memuat daftar presensi masuk...</li>
+          </ul>
+        </div>
+
+        <div class="surface-card today-log-card">
+          <div class="today-log-head">
+            <div>
+              <h2 class="today-log-title">Berhasil Presensi Pulang</h2>
+              <p class="today-log-sub">Peserta yang sudah mencatat presensi pulang hari ini.</p>
+            </div>
+            <div class="today-log-head-meta">
+              <span id="logDateCheckOut" class="log-date-tag">Hari ini</span>
+              <span id="countTodayCheckOut" class="log-count-pill log-count-out">0</span>
+            </div>
+          </div>
+          <ul id="todayCheckOutList" class="today-log-list">
+            <li class="log-empty-row">Memuat daftar presensi pulang...</li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- KOLOM TENGAH: KAMERA PRESENSI -->
+      <div class="surface-card camera-panel">
+        <div class="camera-head">
+          <div class="camera-head-title">
+            <h2>Kamera Presensi Wajah</h2>
+            <p id="cameraSubStatus" class="camera-substatus">Kamera dalam posisi nonaktif</p>
+          </div>
+
+          <div class="camera-select-wrap">
+            <label for="cameraSelect" class="sr-only">Pilih Perangkat Kamera</label>
+            <select id="cameraSelect" class="camera-select" onchange="onCameraSelected(this.value)">
+              <option value="">Kamera belum aktif</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="cameraViewport" class="camera-viewport">
+          <div id="cameraInactiveState" class="camera-idle">
+            <div class="camera-idle-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
+            <h3 class="camera-idle-title">Kamera Belum Diaktifkan</h3>
+            <p class="camera-idle-desc">
+              Tekan "Aktifkan Kamera" di bawah untuk membuka pratinjau sebelum mengambil gambar wajah.
+            </p>
+          </div>
+
+          <video id="kioskVideo" autoplay playsinline muted class="camera-video is-hidden"></video>
+          <canvas id="overlayCanvas" class="camera-overlay is-hidden"></canvas>
+
+          <div id="cameraActiveHud" class="camera-hud is-hidden">
+            <div class="hud-top">
+              <span id="hudFeedModeLabel" class="hud-chip">Pratinjau Aktif</span>
+              <span class="hud-chip">Mode Cermin</span>
+            </div>
+
+            <div class="face-guide-stack" aria-hidden="true">
+              <div class="face-guide"></div>
+              <span class="face-guide-caption">Posisikan wajah di dalam bingkai</span>
+            </div>
+
+            <div></div>
+          </div>
+        </div>
+
+        <div class="camera-actions">
+          <button id="btnActivateCamera" type="button" class="btn-primary-action" onclick="toggleCameraPreview()">
+            <span id="iconActivateWrap" class="btn-icon-wrap" aria-hidden="true">
+              <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </span>
+            <span id="labelActivateCamera">Aktifkan Kamera</span>
+          </button>
+
+          <button id="btnStartAttendance" type="button" class="btn-attendance-action is-hidden" onclick="startAttendanceCapture()">
+            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+              <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+              <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+              <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+              <circle cx="12" cy="10" r="3"/>
+              <path d="M8 17a4 4 0 0 1 8 0"/>
+            </svg>
+            <span id="labelStartAttendance">Mulai Presensi</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KOLOM KANAN: WAKTU SERVER, JADWAL SESI & STATUS KESIAPAN -->
+      <aside id="panelJadwal" class="side-column" aria-label="Informasi Waktu Server, Jadwal, dan Status Presensi">
+        <div class="surface-card schedule-panel">
+          <div class="clock-anchor">
+            <div class="clock-anchor-top">
+              <span class="clock-kicker">Waktu Server Pusat</span>
+              <span class="clock-tz">WIB (UTC+7)</span>
+            </div>
+            <div id="clockTime" class="clock-value">--.--.-- WIB</div>
+            <p id="clockDate" class="clock-date">Memuat tanggal server...</p>
+          </div>
+
+          <div class="schedule-body">
+            <div class="session-row">
+              <span id="sessionIndicator" class="session-tag session-tag-loading">
+                <span id="sessionDot" class="session-dot" aria-hidden="true"></span>
+                <span id="sessionLabel">Memuat jadwal server...</span>
+              </span>
+            </div>
+
+            <p id="sessionScheduleMeta" class="schedule-summary">
+              Menghubungkan ke jadwal server...
+            </p>
+
+            <div class="schedule-slots">
+              <div id="boxSesiMasuk" class="schedule-slot">
+                <span class="slot-label">Presensi Masuk</span>
+                <span id="schedMasukRange" class="slot-time">06:00 - 09:00</span>
+              </div>
+              <div id="boxSesiPulang" class="schedule-slot">
+                <span class="slot-label">Presensi Pulang</span>
+                <span id="schedPulangRange" class="slot-time">14:00 - 16:00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="statusCard" class="surface-card status-panel status-standby" role="status" aria-live="polite">
+          <div class="status-header">
+            <div id="statusIconBox" class="status-icon-box" aria-hidden="true">
+              <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+            </div>
+            <div class="status-copy">
+              <h3 id="statusTitle" class="status-title">Aktifkan Kamera untuk Memulai</h3>
+              <p id="statusSubtitle" class="status-subtitle">
+                Jenis presensi (Masuk atau Pulang) ditentukan otomatis oleh jam server.
+              </p>
+            </div>
+          </div>
+
+          <ul id="guideSteps" class="readiness-list">
+            <li class="readiness-item">
+              <span class="readiness-key">Jadwal Server</span>
+              <span id="readyScheduleVal" class="readiness-val">Memuat...</span>
+            </li>
+            <li class="readiness-item">
+              <span class="readiness-key">Lingkup Lokasi</span>
+              <span id="readyLocationVal" class="readiness-val">Memuat...</span>
+            </li>
+            <li class="readiness-item">
+              <span class="readiness-key">Status Kamera</span>
+              <span id="readyCameraVal" class="readiness-val">Belum aktif</span>
+            </li>
+          </ul>
+
+          <button id="btnFallback" type="button" class="btn-fallback is-hidden" onclick="openPinModal(this)">
+            Gunakan PIN Cadangan Mandiri
+          </button>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Sekretariat DPRD Kota Surakarta | Sistem Presensi Peserta Magang</span>
+    <div class="footer-links">
+      <a href="/admin/index.html" target="_blank" rel="noopener">Dashboard Admin</a>
+      <a href="#top">Ke Atas</a>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       MODAL 1: DAFTAR PESERTA BARU (3 SUDUT FOTO MIRRORED + DIVISI + PIN)
+       ========================================================================= -->
+  <div id="enrollModal" class="modal-backdrop is-hidden" role="dialog" aria-modal="true" aria-labelledby="enrollModalTitle">
+    <div class="modal-card modal-card-lg">
+      <div class="modal-head">
+        <div>
+          <h2 id="enrollModalTitle" class="modal-title">Pendaftaran Wajah Peserta Baru</h2>
+          <p class="modal-subtitle">Lengkapi biodata peserta dan ambil 3 sudut foto wajah (otomatis mode cermin).</p>
+        </div>
+        <button type="button" class="icon-close-btn" aria-label="Tutup form pendaftaran" onclick="closeEnrollmentModal()">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <form id="enrollForm" class="modal-body" onsubmit="submitEnrollmentForm(event)">
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label for="enrollInternId" class="field-label">ID Magang / NIM / NIS *</label>
+            <input id="enrollInternId" type="text" required placeholder="Contoh: MGG-2026-001" class="field-input mono-input" />
+          </div>
+          <div class="field-group">
+            <label for="enrollFullName" class="field-label">Nama Lengkap Peserta *</label>
+            <input id="enrollFullName" type="text" required placeholder="Sesuai KTP atau kartu mahasiswa" class="field-input" />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label for="enrollInstitution" class="field-label">Asal Kampus / Sekolah *</label>
+            <input id="enrollInstitution" type="text" required placeholder="Contoh: Universitas Sebelas Maret" class="field-input" />
+          </div>
+          <div class="field-group">
+            <label for="enrollDivision" class="field-label">Divisi Penempatan *</label>
+            <select id="enrollDivision" required class="field-input">
+              <option value="">Memuat daftar divisi...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="enrollPin" class="field-label">PIN Cadangan Pribadi (4-8 Digit) *</label>
+          <input id="enrollPin" type="password" minlength="4" maxlength="8" value="123456" required placeholder="Default: 123456" class="field-input mono-input" />
+          <p class="field-hint">Dipakai jika wajah gagal terdeteksi kamera saat presensi.</p>
+        </div>
+
+        <div class="pose-section">
+          <div class="pose-section-head pose-section-head-row">
+            <div>
+              <h3>Ambil 3 Foto Sudut Wajah</h3>
+              <p>Lihat posisi wajah pada pratinjau kamera lalu klik masing-masing tombol pose.</p>
+            </div>
+            <div class="enroll-cam-select-wrap">
+              <label for="enrollCameraSelect" class="sr-only">Pilih Kamera Pendaftaran</label>
+              <select id="enrollCameraSelect" class="enroll-cam-select" onchange="onCameraSelected(this.value)">
+                <option value="">Memuat kamera...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="enroll-cam-box" aria-label="Pratinjau kamera pendaftaran wajah">
+            <video id="enrollPreviewVideo" autoplay playsinline muted class="enroll-preview-video is-hidden"></video>
+            <div id="enrollCamGuide" class="enroll-cam-guide is-hidden" aria-hidden="true">
+              <span>Posisikan wajah di tengah bingkai</span>
+            </div>
+            <div id="enrollCamPlaceholder" class="enroll-cam-placeholder">
+              <span id="enrollCamStatusText">Menyalakan pratinjau kamera...</span>
+              <button type="button" class="btn-outline-soft" onclick="activateCamera()">Aktifkan Kamera</button>
+            </div>
+          </div>
+
+          <div class="pose-grid">
+            <button type="button" id="poseCard_front" class="pose-card" onclick="captureEnrollPose('front')">
+              <span class="pose-frame">
+                <span class="pose-placeholder">Foto 1</span>
+                <img id="thumb_front" class="pose-thumb is-hidden" alt="Pratinjau foto hadap depan" />
+              </span>
+              <span class="pose-name">1. Hadap Depan</span>
+              <span class="pose-hint">Klik untuk ambil</span>
+            </button>
+
+            <button type="button" id="poseCard_left" class="pose-card" onclick="captureEnrollPose('left')">
+              <span class="pose-frame">
+                <span class="pose-placeholder">Foto 2</span>
+                <img id="thumb_left" class="pose-thumb is-hidden" alt="Pratinjau foto toleh kiri" />
+              </span>
+              <span class="pose-name">2. Toleh Kiri</span>
+              <span class="pose-hint">Klik untuk ambil</span>
+            </button>
+
+            <button type="button" id="poseCard_right" class="pose-card" onclick="captureEnrollPose('right')">
+              <span class="pose-frame">
+                <span class="pose-placeholder">Foto 3</span>
+                <img id="thumb_right" class="pose-thumb is-hidden" alt="Pratinjau foto toleh kanan" />
+              </span>
+              <span class="pose-name">3. Toleh Kanan</span>
+              <span class="pose-hint">Klik untuk ambil</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="consent-note">
+          Peserta menyetujui penyimpanan vektor biometrik wajah terenkripsi untuk keperluan presensi sesuai UU PDP Indonesia.
+        </p>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeEnrollmentModal()">Batal</button>
+          <button id="btnSubmitEnroll" type="submit" class="btn-submit">
+            <span>Simpan &amp; Daftarkan Wajah</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 2: PRESENSI MANDIRI (PIN FALLBACK)
+       ========================================================================= -->
+  <div id="pinModal" class="modal-backdrop is-hidden" role="dialog" aria-modal="true" aria-labelledby="pinModalTitle">
+    <div class="modal-card modal-card-sm">
+      <div class="modal-head">
+        <div>
+          <h2 id="pinModalTitle" class="modal-title">Presensi Mandiri (PIN)</h2>
+          <p class="modal-subtitle">Gunakan jalur PIN jika wajah belum terbaca oleh kamera.</p>
+        </div>
+        <button type="button" class="icon-close-btn" aria-label="Tutup modal PIN" onclick="closePinModal()">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <form class="modal-body" onsubmit="event.preventDefault(); submitPinAttendance();">
+        <p class="pin-info">
+          Jenis presensi (Masuk atau Pulang) tetap mengikuti jadwal server yang sedang aktif.
+        </p>
+
+        <div class="field-group">
+          <label for="pinInternId" class="field-label">ID Magang (Nomor Induk)</label>
+          <input id="pinInternId" type="text" required placeholder="Contoh: 23.11.5697" class="field-input mono-input" />
+        </div>
+
+        <div class="field-group">
+          <label for="pinCode" class="field-label">PIN Rahasia (4-8 Digit)</label>
+          <input id="pinCode" type="password" minlength="4" maxlength="8" required placeholder="Masukkan PIN" class="field-input pin-input mono-input" />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closePinModal()">Batal</button>
+          <button type="submit" class="btn-submit">Kirim Presensi PIN</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notifikasi -->
+  <div id="toastContainer" class="toast-stack" aria-live="polite"></div>
+
+  <script src="js/kiosk.js?v=20261120_5"></script>
+</body>
+</html>

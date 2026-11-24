@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Presensi | Magang Setwan DPRD Surakarta</title>
+  <link rel="icon" type="image/png" href="assets/logo-emblem.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="css/admin.css?v=20261122_4" />
+</head>
+<body class="auth-checking">
+  <div id="toastStack" class="toast-stack" role="status" aria-live="polite" aria-atomic="false"></div>
+
+  <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleMobileSidebar(false)" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <aside id="adminSidebar" class="sidebar is-collapsed" aria-label="Menu navigasi admin">
+      <div class="sidebar-header">
+        <a href="#top" class="brand-row" onclick="showTab('logs'); return false;" title="Magang Setwan DPRD Surakarta">
+          <img
+            src="assets/logo-emblem.png"
+            alt="Logo Magang Setwan DPRD Surakarta"
+            class="brand-logo"
+            width="38"
+            height="38"
+            fetchpriority="high"
+          />
+          <div class="brand-meta">
+            <span class="brand-name">Magang Setwan</span>
+            <span class="brand-sub">DPRD Surakarta</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Menu utama">
+        <button id="btn-tab-logs" type="button" class="nav-item active" onclick="showTab('logs')" aria-current="page" title="Presensi Harian">
+          <span class="nav-icon-wrap" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.5 10.5L12 4.5l7.5 6v8a1.5 1.5 0 0 1-1.5 1.5h-12A1.5 1.5 0 0 1 4.5 18.5v-8z"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Presensi Harian</span>
+        </button>
+
+        <button id="btn-tab-reports" type="button" class="nav-item" onclick="showTab('reports')" title="Rekap Laporan">
+          <span class="nav-icon-wrap" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5L14 3.5z"></path>
+              <path d="M14 3.5V8.5h5"></path>
+              <path d="M8.5 13h7"></path>
+              <path d="M8.5 16.5h4.5"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Rekap Laporan</span>
+        </button>
+
+        <button id="btn-tab-participants" type="button" class="nav-item" onclick="showTab('participants')" title="Peserta Magang">
+          <span class="nav-icon-wrap" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9.5" cy="8" r="3.25"></circle>
+              <path d="M4 19.5c0-3 2.4-5 5.5-5s5.5 2 5.5 5"></path>
+              <circle cx="16.5" cy="9" r="2.25"></circle>
+              <path d="M16.5 14.5c2 0 3.5 1.3 3.5 3.5"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Peserta Magang</span>
+        </button>
+
+        <button id="btn-tab-manual" type="button" class="nav-item" onclick="showTab('manual')" title="Input Manual">
+          <span class="nav-icon-wrap" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20h4.5L19 9.5a2.1 2.1 0 0 0-3-3L5.5 17 4 20z"></path>
+              <path d="M13.5 9l3 3"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Input Manual</span>
+        </button>
+
+        <button id="btn-tab-locations" type="button" class="nav-item" onclick="showTab('locations')" title="Lingkup Lokasi">
+          <span class="nav-icon-wrap" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="6.5"></circle>
+              <circle cx="12" cy="12" r="2"></circle>
+              <path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Lingkup Lokasi</span>
+        </button>
+
+        <button id="btn-tab-schedule" type="button" class="nav-item" onclick="showTab('schedule')" title="Jadwal Presensi">
+          <span class="nav-icon-wrap" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="8"></circle>
+              <path d="M12 8v4l3 2"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Jadwal Presensi</span>
+        </button>
+
+        <button id="btn-tab-admins" type="button" class="nav-item" onclick="showTab('admins')" title="Akun Admin">
+          <span class="nav-icon-wrap" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3.5L5 6.5v5.5c0 4.5 3 8.2 7 9.5 4-1.3 7-5 7-9.5V6.5l-7-3z"></path>
+              <path d="M9.5 12l1.8 1.8 3.5-3.8"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Akun Admin</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user-chip">
+          <span id="currentAdminName" class="user-chip-name">Memuat sesi...</span>
+          <span id="currentAdminRole" class="user-chip-role">Admin</span>
+        </div>
+
+        <button
+          id="btnSidebarToggle"
+          type="button"
+          class="sidebar-footer-link sidebar-collapse-btn"
+          onclick="toggleSidebarCollapse()"
+          aria-expanded="false"
+          aria-label="Bentangkan menu navigasi"
+          title="Bentangkan atau ciutkan menu"
+        >
+          <span class="nav-icon-wrap" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 12H7"></path>
+              <path d="M11 8l-4 4 4 4"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Ciutkan Menu</span>
+        </button>
+
+        <a href="/kiosk/index.html" class="sidebar-footer-link" title="Layar Kiosk">
+          <span class="nav-icon-wrap" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3.5" y="4.5" width="17" height="12" rx="2"></rect>
+              <path d="M9 20h6"></path>
+              <path d="M12 16.5V20"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Layar Kiosk</span>
+        </a>
+
+        <button id="btnAdminLogout" type="button" class="sidebar-footer-link sidebar-logout-btn" onclick="logoutAdmin()" title="Keluar Akun">
+          <span class="nav-icon-wrap" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 4.5h3.5a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H14"></path>
+              <path d="M4 12h11"></path>
+              <path d="M11 8.5L15 12l-4 3.5"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Keluar</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="workspace" id="top">
+      <div class="mobile-header">
+        <button
+          id="btnMobileMenu"
+          type="button"
+          class="icon-btn"
+          onclick="toggleMobileSidebar(true)"
+          aria-label="Buka menu navigasi"
+          aria-controls="adminSidebar"
+          aria-expanded="false"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div class="mobile-brand">
+          <img src="assets/logo-emblem.png" alt="Logo Magang Setwan DPRD Surakarta" width="30" height="30" />
+          <div class="mobile-brand-meta">
+            <span class="mobile-brand-title">Magang Setwan</span>
+            <span class="mobile-brand-sub">DPRD Surakarta</span>
+          </div>
+        </div>
+        <a href="/kiosk/index.html" class="mobile-kiosk-link">Kiosk</a>
+      </div>
+
+      <header class="workspace-header">
+        <div class="header-titles">
+          <h1 id="activeSectionTitle" class="page-title">Presensi Harian</h1>
+          <p id="activeSectionDesc" class="page-subtitle">Pantau catatan kehadiran masuk, pulang, dan pemeriksaan kecocokan wajah.</p>
+        </div>
+        <div class="header-actions">
+          <button id="btnRefreshAll" type="button" class="btn btn-secondary" onclick="refreshCurrentView()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            <span>Muat Ulang</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace-main">
+        <!-- TAB 1: Presensi Harian -->
+        <section id="tab-logs" class="tab-pane is-active" aria-labelledby="btn-tab-logs">
+          <div class="summary-strip" aria-label="Ringkasan presensi hari ini">
+            <div class="summary-cell">
+              <span class="summary-label">Peserta Aktif</span>
+              <strong id="statActiveParticipants" class="summary-value">0</strong>
+            </div>
+            <div class="summary-cell">
+              <span class="summary-label">Masuk Hari Ini</span>
+              <strong id="statCheckIns" class="summary-value">0</strong>
+            </div>
+            <div class="summary-cell">
+              <span class="summary-label">Pulang Hari Ini</span>
+              <strong id="statCheckOuts" class="summary-value">0</strong>
+            </div>
+            <div class="summary-cell">
+              <span class="summary-label">Perlu Tinjau</span>
+              <strong id="statFlagged" class="summary-value summary-warn">0</strong>
+            </div>
+          </div>
+
+          <div class="surface-card">
+            <div class="card-toolbar">
+              <div class="toolbar-group">
+                <div class="field-inline">
+                  <label for="filterDate" class="field-label">Tanggal</label>
+                  <input type="date" id="filterDate" class="control-input" onchange="loadAttendanceLogs()" />
+                </div>
+                <label class="toggle-chip" for="filterFlagged">
+                  <input type="checkbox" id="filterFlagged" onchange="loadAttendanceLogs()" />
+                  <span>Perlu Tinjau Saja</span>
+                </label>
+              </div>
+              <div class="toolbar-group">
+                <button type="button" class="btn btn-subtle-danger" onclick="cleanDuplicatesToday()">Bersihkan Ganda</button>
+              </div>
+            </div>
+
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Waktu</th>
+                    <th scope="col">Peserta</th>
+                    <th scope="col">Sesi</th>
+                    <th scope="col">Metode &amp; Lokasi</th>
+                    <th scope="col">Foto</th>
+                    <th scope="col">Keterangan</th>
+                    <th scope="col" class="col-action">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="logsTableBody">
+                  <tr>
+                    <td colspan="7" class="table-state">Memuat catatan presensi...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB: Rekap Laporan -->
+        <section id="tab-reports" class="tab-pane" aria-labelledby="btn-tab-reports" hidden>
+          <div class="surface-card report-filter-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Susun Rekap Presensi per Peserta</h2>
+                <p class="card-note">Pilih peserta dan rentang tanggal untuk meninjau daftar hadir (Nama, Tanggal, Waktu Masuk, Waktu Pulang) lalu unduh CSV atau PDF A4 (maks. 30 hari per lembar).</p>
+              </div>
+              <span id="reportA4Badge" class="status-pill pill-info">Template A4 | 30 hari/lembar</span>
+            </div>
+
+            <div class="report-filter-body">
+              <div class="report-controls-grid">
+                <div class="form-field">
+                  <label for="reportParticipantSelect" class="field-label">Peserta Magang</label>
+                  <select id="reportParticipantSelect" class="control-input" onchange="loadParticipantReportPreview()">
+                    <option value="">Memuat daftar peserta...</option>
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label for="reportStartDate" class="field-label">Dari Tanggal</label>
+                  <input type="date" id="reportStartDate" class="control-input" onchange="onReportDateChange()" />
+                </div>
+
+                <div class="form-field">
+                  <label for="reportEndDate" class="field-label">Sampai Tanggal</label>
+                  <input type="date" id="reportEndDate" class="control-input" onchange="onReportDateChange()" />
+                </div>
+              </div>
+
+              <div class="report-action-bar">
+                <div class="report-preset-group" role="group" aria-label="Pilihan cepat rentang tanggal">
+                  <button type="button" class="btn btn-secondary btn-sm report-preset-btn active" data-preset="30d" onclick="setReportPreset('30d')">30 Hari Terakhir</button>
+                  <button type="button" class="btn btn-secondary btn-sm report-preset-btn" data-preset="this_month" onclick="setReportPreset('this_month')">Bulan Ini</button>
+                  <button type="button" class="btn btn-secondary btn-sm report-preset-btn" data-preset="prev_month" onclick="setReportPreset('prev_month')">Bulan Lalu</button>
+                </div>
+
+                <div class="toolbar-group">
+                  <button type="button" class="btn btn-secondary" onclick="loadParticipantReportPreview()">Perbarui Pratinjau</button>
+                  <button id="btnDownloadReportCsv" type="button" class="btn btn-secondary" onclick="downloadParticipantReport('csv')" disabled>Unduh CSV</button>
+                  <button id="btnDownloadReportPdf" type="button" class="btn btn-primary" onclick="downloadParticipantReport('pdf')" disabled>Unduh PDF (A4)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="reportSummaryPanel" class="report-summary-panel" hidden>
+            <div class="surface-card report-participant-card">
+              <div class="report-participant-info">
+                <div>
+                  <h3 id="reportParticipantTitle" class="report-participant-name">-</h3>
+                  <p id="reportParticipantSub" class="card-note">-</p>
+                </div>
+                <span id="reportPageEstimate" class="mono-pill">1 halaman A4</span>
+              </div>
+            </div>
+
+            <div class="summary-strip report-summary-strip" aria-label="Ringkasan rekap peserta terpilih">
+              <div class="summary-cell">
+                <span class="summary-label">Total Hari</span>
+                <strong id="repStatTotalDays" class="summary-value">0</strong>
+              </div>
+              <div class="summary-cell">
+                <span class="summary-label">Hari Hadir</span>
+                <strong id="repStatPresent" class="summary-value">0</strong>
+              </div>
+              <div class="summary-cell">
+                <span class="summary-label">Tepat Waktu</span>
+                <strong id="repStatOnTime" class="summary-value">0</strong>
+              </div>
+              <div class="summary-cell">
+                <span class="summary-label">Terlambat</span>
+                <strong id="repStatLate" class="summary-value summary-warn">0</strong>
+              </div>
+              <div class="summary-cell">
+                <span class="summary-label">Izin</span>
+                <strong id="repStatLeave" class="summary-value">0</strong>
+              </div>
+              <div class="summary-cell">
+                <span class="summary-label">Pulang Tercatat</span>
+                <strong id="repStatCheckOut" class="summary-value">0</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="surface-card">
+            <div class="card-head compact">
+              <div>
+                <h2 class="card-title">Pratinjau Tabel Rekap</h2>
+                <p id="reportPreviewSubtitle" class="card-note">Pilih peserta untuk melihat pratinjau rekap sebelum mengunduh file.</p>
+              </div>
+              <span id="reportPeriodTag" class="mono-pill" hidden>-</span>
+            </div>
+
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">Nama</th>
+                    <th scope="col">Tanggal</th>
+                    <th scope="col">Waktu Masuk</th>
+                    <th scope="col">Waktu Pulang</th>
+                    <th scope="col">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="reportPreviewTableBody">
+                  <tr>
+                    <td colspan="6" class="table-state">Pilih peserta magang di atas untuk menampilkan rekap kehadiran.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: Peserta Magang -->
+        <section id="tab-participants" class="tab-pane" aria-labelledby="btn-tab-participants" hidden>
+          <div class="surface-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Daftar Peserta &amp; Persetujuan Biometrik</h2>
+                <p class="card-note">Menonaktifkan peserta langsung menghapus seluruh vektor wajahnya sesuai ketentuan UU PDP.</p>
+              </div>
+              <a href="/kiosk/register.html" class="btn btn-primary">Daftarkan Peserta</a>
+            </div>
+
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">ID Magang</th>
+                    <th scope="col">Peserta</th>
+                    <th scope="col">Masa Magang</th>
+                    <th scope="col">Data Wajah</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="col-action">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="participantsTableBody">
+                  <tr>
+                    <td colspan="6" class="table-state">Memuat daftar peserta...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: Input Manual -->
+        <section id="tab-manual" class="tab-pane" aria-labelledby="btn-tab-manual" hidden>
+          <div class="surface-card form-card-narrow">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Catat Presensi Manual</h2>
+                <p class="card-note">Gunakan formulir ini jika kamera perangkat mengalami kendala atau peserta memperoleh izin resmi.</p>
+              </div>
+            </div>
+
+            <form id="manualForm" class="stack-form" onsubmit="submitManualAttendanceForm(event)">
+              <div class="form-field">
+                <label for="manualParticipantSelect" class="field-label">Peserta Magang</label>
+                <select id="manualParticipantSelect" class="control-input" required>
+                  <option value="">Memuat daftar peserta aktif...</option>
+                </select>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-field">
+                  <label for="manualType" class="field-label">Jenis Sesi</label>
+                  <select id="manualType" class="control-input" required>
+                    <option value="check_in">Presensi Masuk</option>
+                    <option value="check_out">Presensi Pulang</option>
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label for="manualAdminName" class="field-label">Nama Petugas</label>
+                  <input type="text" id="manualAdminName" class="control-input" required placeholder="Misal: Budi Santoso" />
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label for="manualReason" class="field-label">Alasan Pencatatan</label>
+                <textarea id="manualReason" class="control-input" rows="3" required minlength="5" placeholder="Jelaskan kendala kamera atau keterangan izin resmi..."></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-full">Simpan Catatan Presensi</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- TAB 4: Lingkup Lokasi -->
+        <section id="tab-locations" class="tab-pane" aria-labelledby="btn-tab-locations" hidden>
+          <div id="geofenceStatusBanner" class="status-banner">
+            <div class="banner-copy">
+              <h2 id="geofenceBannerTitle" class="banner-title">Memuat status pembatasan lokasi...</h2>
+              <p id="geofenceBannerDesc" class="banner-desc">Memeriksa titik koordinat aktif pada database.</p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="startNewLocation()">Tambah Titik Lokasi</button>
+          </div>
+
+          <div class="surface-card search-panel">
+            <div class="search-row">
+              <label for="locSearchInput" class="sr-only">Cari alamat atau nama gedung</label>
+              <input
+                type="text"
+                id="locSearchInput"
+                class="control-input search-input"
+                placeholder="Cari nama gedung atau jalan, contoh: DPRD Surakarta"
+                onkeydown="if(event.key==='Enter'){event.preventDefault(); searchAddress();}"
+              />
+              <button type="button" class="btn btn-secondary" onclick="searchAddress()">Cari Alamat</button>
+            </div>
+            <div id="locSearchResults" class="search-results hidden"></div>
+          </div>
+
+          <div class="geofence-layout">
+            <div class="geofence-left">
+              <div class="surface-card">
+                <div class="card-head compact">
+                  <h2 class="card-title">Titik Tersimpan</h2>
+                </div>
+                <div id="locationsList" class="saved-locations-list">
+                  <div class="inline-state">Memuat daftar lokasi...</div>
+                </div>
+              </div>
+
+              <div class="surface-card">
+                <div class="card-head compact">
+                  <h2 id="locFormTitle" class="card-title">Titik Lokasi Baru</h2>
+                  <span id="locModeBadge" class="status-pill pill-info">Mode Baru</span>
+                </div>
+
+                <form id="locationForm" class="stack-form" onsubmit="saveLocationForm(event)">
+                  <input type="hidden" id="locId" value="" />
+
+                  <div class="form-field">
+                    <label for="locName" class="field-label">Nama Lokasi</label>
+                    <input type="text" id="locName" class="control-input" required placeholder="Contoh: Gedung DPRD Kota Surakarta" />
+                  </div>
+
+                  <div class="form-field">
+                    <label for="locAddress" class="field-label">Alamat Lengkap</label>
+                    <input type="text" id="locAddress" class="control-input" placeholder="Opsional: nama jalan atau keterangan area" />
+                  </div>
+
+                  <div class="form-grid-2">
+                    <div class="form-field">
+                      <label for="locLat" class="field-label">Latitude</label>
+                      <input type="number" step="any" id="locLat" class="control-input mono-input" required oninput="onCoordInputChange()" placeholder="-7.556100" />
+                    </div>
+                    <div class="form-field">
+                      <label for="locLng" class="field-label">Longitude</label>
+                      <input type="number" step="any" id="locLng" class="control-input mono-input" required oninput="onCoordInputChange()" placeholder="110.831200" />
+                    </div>
+                  </div>
+
+                  <button type="button" class="btn btn-secondary btn-full" onclick="useMyCurrentLocation()">Gunakan Koordinat Perangkat Ini</button>
+
+                  <div class="radius-box">
+                    <div class="radius-head">
+                      <label for="locRadiusSlider" class="field-label">Radius Jangkauan</label>
+                      <strong id="radiusValueLabel" class="radius-readout">100 meter</strong>
+                    </div>
+                    <input
+                      type="range"
+                      id="locRadiusSlider"
+                      min="20"
+                      max="5000"
+                      step="10"
+                      value="100"
+                      oninput="onRadiusSliderInput(this.value)"
+                    />
+                    <div class="preset-row">
+                      <button type="button" class="preset-btn" onclick="setRadiusPreset(50)">50m</button>
+                      <button type="button" class="preset-btn active" onclick="setRadiusPreset(100)">100m</button>
+                      <button type="button" class="preset-btn" onclick="setRadiusPreset(250)">250m</button>
+                      <button type="button" class="preset-btn" onclick="setRadiusPreset(500)">500m</button>
+                      <button type="button" class="preset-btn" onclick="setRadiusPreset(1000)">1km</button>
+                      <button type="button" class="preset-btn" onclick="setRadiusPreset(2000)">2km</button>
+                    </div>
+                  </div>
+
+                  <label class="toggle-chip toggle-block" for="locIsActive">
+                    <input type="checkbox" id="locIsActive" checked />
+                    <span>Aktifkan pembatasan lokasi pada titik ini</span>
+                  </label>
+
+                  <button type="submit" class="btn btn-primary btn-full">Simpan Titik Lokasi</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="surface-card map-card">
+              <div class="card-head compact">
+                <div>
+                  <h2 class="card-title">Peta Jangkauan</h2>
+                  <p class="card-note">Klik area peta atau geser penanda biru untuk memindahkan pusat radius.</p>
+                </div>
+                <div class="map-tools">
+                  <span id="mapCoordPreview" class="mono-pill">-7.556100, 110.831200</span>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="fitMapToRadius()">Paskan Peta</button>
+                </div>
+              </div>
+              <div id="locationMap" class="leaflet-canvas"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 5: Jadwal Presensi -->
+        <section id="tab-schedule" class="tab-pane" aria-labelledby="btn-tab-schedule" hidden>
+          <div id="scheduleStatusBanner" class="status-banner">
+            <div class="banner-copy">
+              <h2 id="schedLiveTitle" class="banner-title">Memuat status sesi...</h2>
+              <p id="schedLiveDesc" class="banner-desc">Memeriksa jam operasional presensi dari server.</p>
+            </div>
+            <div id="schedServerClock" class="mono-clock">00:00:00 WIB</div>
+          </div>
+
+          <form id="scheduleForm" onsubmit="saveScheduleForm(event)">
+            <div class="schedule-grid">
+              <div class="surface-card schedule-card">
+                <div class="card-head compact">
+                  <div>
+                    <h2 class="card-title">Sesi Masuk</h2>
+                    <p class="card-note">Rentang waktu pencatatan kedatangan peserta.</p>
+                  </div>
+                  <span class="status-pill pill-success">Check-in</span>
+                </div>
+
+                <div class="schedule-time-row">
+                  <div class="form-field-compact">
+                    <label for="schedCheckInStartHour" class="field-label">Jam Mulai (24 Jam)</label>
+                    <div class="time-dropdown-pair">
+                      <select id="schedCheckInStartHour" class="time-select" aria-label="Jam mulai sesi masuk"></select>
+                      <span class="time-colon" aria-hidden="true">:</span>
+                      <label for="schedCheckInStartMin" class="sr-only">Menit mulai sesi masuk</label>
+                      <select id="schedCheckInStartMin" class="time-select"></select>
+                    </div>
+                  </div>
+                  <div class="form-field-compact">
+                    <label for="schedCheckInEndHour" class="field-label">Jam Selesai (24 Jam)</label>
+                    <div class="time-dropdown-pair">
+                      <select id="schedCheckInEndHour" class="time-select" aria-label="Jam selesai sesi masuk"></select>
+                      <span class="time-colon" aria-hidden="true">:</span>
+                      <label for="schedCheckInEndMin" class="sr-only">Menit selesai sesi masuk</label>
+                      <select id="schedCheckInEndMin" class="time-select"></select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="surface-card schedule-card">
+                <div class="card-head compact">
+                  <div>
+                    <h2 class="card-title">Sesi Pulang</h2>
+                    <p class="card-note">Rentang waktu pencatatan kepulangan peserta.</p>
+                  </div>
+                  <span class="status-pill pill-info">Check-out</span>
+                </div>
+
+                <div class="schedule-time-row">
+                  <div class="form-field-compact">
+                    <label for="schedCheckOutStartHour" class="field-label">Jam Mulai (24 Jam)</label>
+                    <div class="time-dropdown-pair">
+                      <select id="schedCheckOutStartHour" class="time-select" aria-label="Jam mulai sesi pulang"></select>
+                      <span class="time-colon" aria-hidden="true">:</span>
+                      <label for="schedCheckOutStartMin" class="sr-only">Menit mulai sesi pulang</label>
+                      <select id="schedCheckOutStartMin" class="time-select"></select>
+                    </div>
+                  </div>
+                  <div class="form-field-compact">
+                    <label for="schedCheckOutEndHour" class="field-label">Jam Selesai (24 Jam)</label>
+                    <div class="time-dropdown-pair">
+                      <select id="schedCheckOutEndHour" class="time-select" aria-label="Jam selesai sesi pulang"></select>
+                      <span class="time-colon" aria-hidden="true">:</span>
+                      <label for="schedCheckOutEndMin" class="sr-only">Menit selesai sesi pulang</label>
+                      <select id="schedCheckOutEndMin" class="time-select"></select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="surface-card schedule-footer">
+              <p class="card-note">Perubahan jam langsung diterapkan ke layar presensi kiosk setelah disimpan.</p>
+              <div class="toolbar-group">
+                <button type="button" class="btn btn-secondary" onclick="resetScheduleDefault()">Gunakan Jam Bawaan</button>
+                <button type="submit" class="btn btn-primary">Simpan Jadwal</button>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <!-- TAB 6: Akun Admin -->
+        <section id="tab-admins" class="tab-pane" aria-labelledby="btn-tab-admins" hidden>
+          <div class="admins-layout">
+            <div class="surface-card">
+              <div class="card-head compact">
+                <div>
+                  <h2 class="card-title">Buat Akun Admin</h2>
+                  <p class="card-note">Tambahkan akun pengelola baru untuk mengakses dashboard admin.</p>
+                </div>
+              </div>
+
+              <form id="adminUserForm" class="stack-form" onsubmit="createAdminUserForm(event)">
+                <div class="admin-input-stack">
+                  <div class="admin-stack-row">
+                    <label for="newAdminFullName" class="admin-stack-label">Nama Lengkap</label>
+                    <input id="newAdminFullName" type="text" required minlength="2" placeholder="Contoh: Rina Wijaya" class="admin-stack-input" />
+                  </div>
+                  <div class="admin-stack-row">
+                    <label for="newAdminEmail" class="admin-stack-label">Alamat Email</label>
+                    <input id="newAdminEmail" type="email" required placeholder="rina@dprd-surakarta.go.id" class="admin-stack-input" />
+                  </div>
+                  <div class="admin-stack-row">
+                    <label for="newAdminPassword" class="admin-stack-label">Kata Sandi (min. 6 karakter)</label>
+                    <div class="password-inline-row">
+                      <input id="newAdminPassword" type="password" required minlength="6" placeholder="Masukkan kata sandi" class="admin-stack-input" />
+                      <button
+                        type="button"
+                        class="pw-inline-toggle"
+                        onclick="toggleAdminPasswordField('newAdminPassword', this)"
+                        aria-label="Tampilkan atau sembunyikan kata sandi akun baru"
+                        aria-pressed="false"
+                      >
+                        Tampilkan
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="newAdminRole" class="field-label">Peran Akses</label>
+                  <select id="newAdminRole" class="control-input" required>
+                    <option value="admin">Admin Operasional</option>
+                    <option value="superadmin">Superadmin</option>
+                  </select>
+                </div>
+
+                <button type="submit" class="btn btn-dark-solid btn-full">Buat Akun Admin</button>
+              </form>
+            </div>
+
+            <div class="surface-card">
+              <div class="card-head compact">
+                <div>
+                  <h2 class="card-title">Daftar Akun Terdaftar</h2>
+                  <p class="card-note">Kelola status akses admin yang dapat masuk ke halaman ini.</p>
+                </div>
+              </div>
+
+              <div class="table-scroll">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Pengelola</th>
+                      <th scope="col">Username</th>
+                      <th scope="col">Peran</th>
+                      <th scope="col">Login Terakhir</th>
+                      <th scope="col">Status</th>
+                      <th scope="col" class="col-action">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminUsersTableBody">
+                    <tr>
+                      <td colspan="6" class="table-state">Memuat daftar akun admin...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Accessible Photo Zoom Modal -->
+  <div id="photoModal" class="photo-modal" role="dialog" aria-modal="true" aria-labelledby="photoModalTitle" hidden onclick="closePhotoModal(event)">
+    <div class="photo-modal-dialog" onclick="event.stopPropagation()">
+      <div class="photo-modal-bar">
+        <span id="photoModalTitle" class="modal-title">Bukti Foto Presensi</span>
+        <button id="btnClosePhotoModal" type="button" class="modal-close-btn" onclick="closePhotoModal()" aria-label="Tutup pratinjau foto">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <img id="zoomedImg" src="" alt="Bukti foto presensi peserta" />
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="js/admin.js?v=20261122_3"></script>
+</body>
+</html>

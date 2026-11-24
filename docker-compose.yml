@@ -1,0 +1,57 @@
+services:
+  # ---- PostgreSQL Database ----
+  postgres:
+    image: postgres:16-alpine
+    container_name: dprd_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: absensi_dprd
+      POSTGRES_USER: dprd_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Wajib set POSTGRES_PASSWORD di .env}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      # Locale Indonesia
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # Hanya bind ke localhost — tidak expose ke jaringan luar
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dprd_user -d absensi_dprd"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - dprd_network
+
+  # ---- pgAdmin (hanya untuk profile dev) ----
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: dprd_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@dprd.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "127.0.0.1:5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dprd_network
+    profiles:
+      - dev    # Aktifkan dengan: docker compose --profile dev up
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  dprd_network:
+    driver: bridge
