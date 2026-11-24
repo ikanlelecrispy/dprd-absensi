@@ -1,11 +1,66 @@
 from dataclasses import dataclass
+import importlib
 import os
+import pkgutil
+import shutil
+import sys
 import tempfile
 from pathlib import Path
 import numpy as np
 
 from app.config import get_settings
 from app.core.quality_checker import quality_checker, QualityCheckResult
+
+
+def _ensure_skimage_lazy_fallback():
+    """
+    Vercel Python bundler menghapus file type stub (.pyi) dari _vendor,
+    sehingga lazy_loader.attach_stub pada scikit-image gagal menemukan .pyi.
+    Fallback ini memuat submodul/atribut langsung dari file .py/.so yang tersedia.
+    """
+    try:
+        import lazy_loader
+    except ImportError:
+        return
+
+    if getattr(lazy_loader.attach_stub, "_dprd_patched", False):
+        return
+
+    orig_attach_stub = lazy_loader.attach_stub
+
+    def _safe_attach_stub(package_name: str, filename: str):
+        try:
+            return orig_attach_stub(package_name, filename)
+        except ValueError:
+            pkg_dir = Path(filename).parent
+            submods = [m.name for m in pkgutil.iter_modules([str(pkg_dir)])]
+            ordered = [s for s in submods if not s.startswith("_")] + [
+                s for s in submods if s.startswith("_")
+            ]
+
+            def _getattr(name: str):
+                pkg_mod = sys.modules.get(package_name)
+                if name in submods:
+                    val = importlib.import_module(f"{package_name}.{name}")
+                    if pkg_mod is not None:
+                        setattr(pkg_mod, name, val)
+                    return val
+                for sub in ordered:
+                    try:
+                        mod = importlib.import_module(f"{package_name}.{sub}")
+                        if hasattr(mod, name):
+                            val = getattr(mod, name)
+                            if pkg_mod is not None:
+                                setattr(pkg_mod, name, val)
+                            return val
+                    except Exception:
+                        continue
+                raise AttributeError(f"module {package_name!r} has no attribute {name!r}")
+
+            return _getattr, (lambda: list(submods)), list(submods)
+
+    _safe_attach_stub._dprd_patched = True
+    lazy_loader.attach_stub = _safe_attach_stub
 
 
 @dataclass
@@ -40,6 +95,9 @@ class FaceProcessor:
         if self._is_initialized:
             return
 
+        os.environ.setdefault("NO_ALBUMENTATIONS_UPDATE", "1")
+        _ensure_skimage_lazy_fallback()
+
         import insightface
         from insightface.app import FaceAnalysis
 
@@ -49,6 +107,10 @@ class FaceProcessor:
         else:
             models_root = Path(__file__).resolve().parent.parent.parent / "models"
         models_root.mkdir(parents=True, exist_ok=True)
+
+        expected_dir = models_root / "models" / self.settings.insightface_model
+        if expected_dir.exists() and not any(expected_dir.glob("*.onnx")):
+            shutil.rmtree(expected_dir, ignore_errors=True)
 
         # Gunakan CPUExecutionProvider secara eksplisit
         app = FaceAnalysis(
