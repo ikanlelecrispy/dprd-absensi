@@ -1,8 +1,9 @@
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 
@@ -20,7 +21,9 @@ from app.api.websocket import ws_router
 settings = get_settings()
 BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = BASE_DIR.parent / "frontend"
-EVIDENCE_DIR = BASE_DIR / "data" / "evidence_photos"
+EVIDENCE_DIR = Path(settings.resolved_evidence_photo_path)
+if not EVIDENCE_DIR.is_absolute():
+    EVIDENCE_DIR = BASE_DIR / EVIDENCE_DIR
 
 
 @asynccontextmanager
@@ -72,6 +75,7 @@ async def lifespan(app: FastAPI):
         ensure_default_admin(db)
 
         # 4. Muat embedding ke RAM
+        EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
         count = matcher.load_from_db(db)
         print(f"\n[STARTUP] In-memory FaceMatcher siap dengan {count} peserta aktif.")
     finally:
@@ -118,14 +122,37 @@ admin_dir = FRONTEND_DIR / "admin"
 if admin_dir.exists():
     app.mount("/admin", StaticFiles(directory=str(admin_dir), html=True), name="admin")
 
-EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
-app.mount("/evidence", StaticFiles(directory=str(EVIDENCE_DIR)), name="evidence")
+if not os.getenv("VERCEL"):
+    EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
+    app.mount("/evidence", StaticFiles(directory=str(EVIDENCE_DIR)), name="evidence")
+
+
+@app.get("/evidence/{file_path:path}")
+def serve_evidence_photo(file_path: str):
+    """Serve foto bukti presensi dari EVIDENCE_DIR secara aman (kompatibel serverless)."""
+    base_resolved = EVIDENCE_DIR.resolve()
+    target = (base_resolved / file_path).resolve()
+    if not str(target).startswith(str(base_resolved)) or not target.is_file():
+        raise HTTPException(status_code=404, detail="Foto bukti tidak ditemukan.")
+    return FileResponse(target)
 
 
 @app.get("/")
 def root():
     """Redirect root ke halaman kiosk tablet."""
     return RedirectResponse(url="/kiosk/index.html")
+
+
+@app.get("/kiosk")
+def kiosk_shortcut():
+    """Shortcut URL ramah untuk halaman kiosk utama."""
+    return RedirectResponse(url="/kiosk/index.html")
+
+
+@app.get("/admin")
+def admin_shortcut():
+    """Shortcut URL ramah untuk dashboard admin."""
+    return RedirectResponse(url="/admin/index.html")
 
 
 @app.get("/izin")

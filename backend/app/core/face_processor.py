@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import os
+import tempfile
 from pathlib import Path
 import numpy as np
 
@@ -42,8 +43,11 @@ class FaceProcessor:
         import insightface
         from insightface.app import FaceAnalysis
 
-        # Folder simpan model lokal
-        models_root = Path(__file__).resolve().parent.parent.parent / "models"
+        # Folder simpan model lokal (di Vercel serverless hanya tempdir /tmp yang writable)
+        if os.getenv("VERCEL"):
+            models_root = Path(tempfile.gettempdir()) / "models"
+        else:
+            models_root = Path(__file__).resolve().parent.parent.parent / "models"
         models_root.mkdir(parents=True, exist_ok=True)
 
         # Gunakan CPUExecutionProvider secara eksplisit

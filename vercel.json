@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "fluid": true,
+  "regions": ["sin1"],
+  "functions": {
+    "main.py": {
+      "maxDuration": 300,
+      "excludeFiles": "{backend/venv/**,backend/models/**,backend/data/evidence_photos/20*/**,docker-compose*.yml}"
+    }
+  }
+}

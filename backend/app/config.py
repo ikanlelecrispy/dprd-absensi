@@ -1,3 +1,6 @@
+import os
+import tempfile
+from pathlib import Path
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -12,6 +15,15 @@ class Settings(BaseSettings):
 
     # --- Database ---
     database_url: str = "postgresql+psycopg2://dprd_user:password@localhost:5432/absensi_dprd"
+
+    @property
+    def sqlalchemy_database_url(self) -> str:
+        url = self.database_url.strip()
+        if url.startswith("postgres://"):
+            return "postgresql+psycopg2://" + url[len("postgres://"):]
+        if url.startswith("postgresql://"):
+            return "postgresql+psycopg2://" + url[len("postgresql://"):]
+        return url
 
     # --- Security ---
     # Generate: python -c "import secrets; print(secrets.token_hex(32))"
@@ -42,6 +54,12 @@ class Settings(BaseSettings):
     evidence_photo_path: str = "./data/evidence_photos"
     enrollment_temp_path: str = "./data/enrollment_temp"
     evidence_retention_days: int = 90
+
+    @property
+    def resolved_evidence_photo_path(self) -> str:
+        if os.getenv("VERCEL") and self.evidence_photo_path.startswith("./"):
+            return str(Path(tempfile.gettempdir()) / "evidence_photos")
+        return self.evidence_photo_path
 
     # --- Server ---
     host: str = "0.0.0.0"

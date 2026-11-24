@@ -65,3 +65,7 @@ desktop.ini
 *.tmp
 logs/
 backend/logs/
+.vercel
+.env*
+!.env.example
+!backend/.env.example

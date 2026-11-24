@@ -156,7 +156,7 @@ def verify_face_attendance(data: FaceVerifyRequest, db: Session = Depends(get_db
         }
 
     # Simpan foto bukti
-    evidence_base = Path(settings.evidence_photo_path)
+    evidence_base = Path(settings.resolved_evidence_photo_path)
     today_str = now.strftime("%Y/%m/%d")
     ev_dir = evidence_base / today_str
     ev_dir.mkdir(parents=True, exist_ok=True)
@@ -312,7 +312,7 @@ def submit_fallback_pin_attendance(data: FallbackPinRequest, db: Session = Depen
             frame_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
             if frame_bgr is not None:
-                evidence_base = Path(settings.evidence_photo_path)
+                evidence_base = Path(settings.resolved_evidence_photo_path)
                 today_str = now.strftime("%Y/%m/%d")
                 ev_dir = evidence_base / today_str
                 ev_dir.mkdir(parents=True, exist_ok=True)

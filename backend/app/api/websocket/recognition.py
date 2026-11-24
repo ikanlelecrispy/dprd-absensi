@@ -41,7 +41,7 @@ async def websocket_kiosk_recognition(websocket: WebSocket):
     })
 
     db = SessionLocal()
-    evidence_base = Path(settings.evidence_photo_path)
+    evidence_base = Path(settings.resolved_evidence_photo_path)
     evidence_base.mkdir(parents=True, exist_ok=True)
 
     try:
